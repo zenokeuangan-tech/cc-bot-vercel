@@ -1,0 +1,10 @@
+{
+  "name": "cc-bot-vercel",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node api/decrypt-pdf.js"
+  },
+  "dependencies": {
+    "pdfjs-dist": "2.16.105"
+  }
+}
