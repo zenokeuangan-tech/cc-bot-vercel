@@ -1,4 +1,5 @@
-const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
+const { PDFDocument } = require('pdf-lib');
+const pdfParse = require('pdf-parse');
 
 module.exports = async function (req, res) {
   if (req.method !== 'POST') {
@@ -18,23 +19,16 @@ module.exports = async function (req, res) {
   try {
     const data = Buffer.from(pdfBase64, 'base64');
     
-    // Load PDF dengan password
-    const loadingTask = pdfjsLib.getDocument({
-      data: data,
-      password: password
-    });
+    // 1. Dekripsi PDF menggunakan pdf-lib
+    const pdfDoc = await PDFDocument.load(data, { password: password });
+    
+    // 2. Simpan kembali sebagai PDF tanpa password
+    const unencryptedPdfBytes = await pdfDoc.save();
+    
+    // 3. Ekstrak teks menggunakan pdf-parse
+    const pdfData = await pdfParse(Buffer.from(unencryptedPdfBytes));
 
-    const pdfDocument = await loadingTask.promise;
-    let fullText = "";
-
-    for (let i = 1; i <= pdfDocument.numPages; i++) {
-      const page = await pdfDocument.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map(item => item.str).join(" ");
-      fullText += pageText + "\n";
-    }
-
-    return res.status(200).json({ text: fullText });
+    return res.status(200).json({ text: pdfData.text });
   } catch (err) {
     console.error("PDF Decrypt Error:", err);
     return res.status(500).json({ error: err.message });

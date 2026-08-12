@@ -5,6 +5,7 @@
     "start": "node api/decrypt-pdf.js"
   },
   "dependencies": {
-    "pdfjs-dist": "2.16.105"
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1"
   }
 }
