@@ -1,4 +1,4 @@
-const { PDFDocument } = require('pdf-lib');
+const { decryptPDF } = require('@pdfsmaller/pdf-decrypt');
 const pdfParse = require('pdf-parse');
 
 module.exports = async function (req, res) {
@@ -19,14 +19,11 @@ module.exports = async function (req, res) {
   try {
     const data = Buffer.from(pdfBase64, 'base64');
     
-    // 1. Dekripsi PDF menggunakan pdf-lib
-    const pdfDoc = await PDFDocument.load(data, { password: password });
+    // Dekripsi PDF (menghapus password)
+    const decryptedBytes = await decryptPDF(new Uint8Array(data), password);
     
-    // 2. Simpan kembali sebagai PDF tanpa password
-    const unencryptedPdfBytes = await pdfDoc.save();
-    
-    // 3. Ekstrak teks menggunakan pdf-parse
-    const pdfData = await pdfParse(Buffer.from(unencryptedPdfBytes));
+    // Ekstrak teks dari PDF yang sudah tidak berpassword
+    const pdfData = await pdfParse(Buffer.from(decryptedBytes));
 
     return res.status(200).json({ text: pdfData.text });
   } catch (err) {
